@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,14 +14,92 @@
       padding: 10px 20px;
       font-size: 16px;
     }
+    #totalWorkTime {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .timeDisplay {
+      margin-top: 10px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
   <h1>Attendance Tracker</h1>
-  <button onclick="recordAttendance()">Record Attendance</button>
+  <button onclick="startWork()">始業</button>
+  <button onclick="endWork()">終業</button>
+  
+  <div id="startTimeDisplay" class="timeDisplay"></div>
+  <div id="endTimeDisplay" class="timeDisplay"></div>
+  <div id="totalWorkTime"></div>
+
   <script>
-    function recordAttendance() {
-      alert('Attendance Recorded!');
+    let startTime = null;
+    let endTime = null;
+
+    // JSONファイルから休憩時間を読み込む
+    async function loadBreakTime() {
+      const response = await fetch('break_time.json');
+      const data = await response.json();
+      return data;
+    }
+
+    // 勤務時間を計算して表示
+    async function calculateWorkTime() {
+      if (startTime && endTime) {
+        const breakTime = await loadBreakTime();
+        const breakStart = new Date(`1970-01-01T${breakTime.breakStart}:00`);
+        const breakEnd = new Date(`1970-01-01T${breakTime.breakEnd}:00`);
+
+        // 始業時間と終業時間をDate型に変換
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+
+        // 休憩時間が勤務時間内に含まれているかを確認
+        let breakDuration = 0;
+        if (end > breakStart && start < breakEnd) {
+          // 休憩時間を勤務時間から差し引く
+          const breakStartTime = Math.max(start.getTime(), breakStart.getTime());
+          const breakEndTime = Math.min(end.getTime(), breakEnd.getTime());
+          breakDuration = (breakEndTime - breakStartTime) / 1000 / 60 / 60; // 時間単位
+        }
+
+        // 勤務時間 = 終業時間 - 始業時間 - 休憩時間
+        const workDuration = (end.getTime() - start.getTime()) / 1000 / 60 / 60 - breakDuration;
+
+        // 結果を表示
+        const workDurationFormatted = formatTime(workDuration);
+        document.getElementById('totalWorkTime').innerText = `合計勤務時間: ${workDurationFormatted}`;
+      }
+    }
+
+    // 時間をhh:mm:ss形式でフォーマットする
+    function formatTime(duration) {
+      const hours = Math.floor(duration);
+      const minutes = Math.floor((duration - hours) * 60);
+      const seconds = Math.floor(((duration - hours) * 60 - minutes) * 60);
+      
+      return `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+    }
+
+    // ゼロ埋め（2桁にする）
+    function padZero(num) {
+      return num < 10 ? '0' + num : num;
+    }
+
+    // 始業ボタンのクリックイベント
+    function startWork() {
+      const time = new Date();
+      startTime = time.toLocaleString(); // 現在の日時
+      document.getElementById('startTimeDisplay').innerText = `始業時刻: ${startTime}`;
+    }
+
+    // 終業ボタンのクリックイベント
+    function endWork() {
+      const time = new Date();
+      endTime = time.toLocaleString(); // 現在の日時
+      document.getElementById('endTimeDisplay').innerText = `終業時刻: ${endTime}`;
+      calculateWorkTime();
     }
   </script>
 </body>
