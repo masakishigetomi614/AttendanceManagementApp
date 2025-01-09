@@ -1,0 +1,26 @@
+{
+  "name": "attendancemanagementapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masakishigetomi614/AttendanceManagementApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/masakishigetomi614/AttendanceManagementApp/issues"
+  },
+  "homepage": "https://github.com/masakishigetomi614/AttendanceManagementApp#readme",
+  "devDependencies": {
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8"
+  }
+}
